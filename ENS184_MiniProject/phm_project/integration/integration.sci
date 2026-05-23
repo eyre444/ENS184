@@ -1,0 +1,67 @@
+// ============================================================
+// integration.sci  —  Student C Module  [INTEGRATION COPY]
+// Goodness-of-Fit Metrics and Failure-Hour Prediction
+//
+//NAME: Carlo Jane A. Branggan
+//ID: 2024-0413
+// HOW TO USE THIS FILE:
+//   1. Develop and test your code in  StudentC/integration.sci
+//   2. When ready to run the test suite, COPY your finished
+//      implementation into THIS file (replace the stubs below).
+//   3. Run:  exec('test_suites/test_studentC.sci', -1)
+//      from the phm_project/ directory.
+// ============================================================
+// ============================================================================
+// Function 1: goodness_of_fit
+// Inputs:  y_actual (vector), y_pred (vector)
+// Outputs: rmse (scalar), r2 (scalar)
+// ============================================================================
+function [rmse, r2] = goodness_of_fit(y_actual, y_pred)
+    
+    // Ensure both inputs are flattened into the same vector shape to avoid dimension errors
+    y_actual = y_actual(:);
+    y_pred = y_pred(:);
+    
+    // Calculate number of elements
+    n = length(y_actual);
+    
+    // Calculate differences (residuals)
+    residuals = y_actual - y_pred;
+    
+    // Residual Sum of Squares (SS_res)
+    ss_res = sum(residuals .^ 2);
+    
+    // Root Mean Squared Error
+    rmse = sqrt(ss_res / n);
+    
+    // Total Sum of Squares (SS_tot)
+    mean_actual = mean(y_actual);
+    ss_tot = sum((y_actual - mean_actual) .^ 2);
+    
+    // Calculate Coefficient of Determination (R^2)
+    // Protection against division-by-zero if variance is zero
+    if ss_tot == 0 then
+        r2 = 0;
+    else
+        r2 = 1 - (ss_res / ss_tot);
+    end
+endfunction
+
+// ============================================================================
+// Function 2: find_threshold_hour
+// Inputs:  hours (vector), vib_fit (vector), threshold (scalar)
+// Output:  h_star (scalar)
+// ============================================================================
+function [h_star] = find_threshold_hour(hours, vib_fit, threshold)
+
+    // Default value if threshold is never reached or exceeded
+    h_star = %inf;
+    
+    // Use a manual loop to find the very first timestamp crossing the limit
+    for i = 1:length(vib_fit)
+        if vib_fit(i) >= threshold then
+            h_star = hours(i); // Capture the hour of the initial breach
+            break;             // Stop the loop immediately
+        end
+    end
+endfunction

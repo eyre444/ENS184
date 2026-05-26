@@ -4,6 +4,38 @@
 //
 //NAME: Carlo Jane A. Branggan
 //ID: 2024-0413
+// You must implement TWO functions in this file.
+// Do NOT change the function signatures.
+//
+// FORBIDDEN: Do NOT use Scilab's built-in fsolve(), roots(), or any
+// root-finding builtin for find_threshold_hour.  Implement bisection
+// from scratch as described in the manual.
+// ============================================================
+
+funcprot(0);   // suppress redefinition warnings when re-running
+
+// ------------------------------------------------------------
+// Function 1: goodness_of_fit
+//
+// Computes two model-accuracy metrics: RMSE and R².
+//
+// Input:
+//   y_actual - vector of observed (measured) values    (n)
+//   y_pred   - vector of model-predicted values        (n)
+//
+// Output:
+//   rmse - Root-Mean-Square Error  (scalar, lower = better)
+//   r2   - Coefficient of Determination  (scalar, closer to 1 = better)
+//
+// Hints:
+//   - RMSE measures the typical size of prediction errors.  Start by
+//     computing each residual (actual minus predicted), then build the
+//     "root mean square" from those residuals.
+//   - R² compares your model's total squared error against the baseline
+//     error of simply predicting the mean of y_actual.  Write out both
+//     sums explicitly before coding them.
+//   - Consider what R² should equal when all observed values are identical
+//     (SS_tot = 0) and handle that case explicitly.
 // HOW TO USE THIS FILE:
 //   1. Develop and test your code in  StudentC/integration.sci
 //   2. When ready to run the test suite, COPY your finished

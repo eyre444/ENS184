@@ -2,8 +2,8 @@
 // interpolation.sci  —  Student A Skeleton
 // Polynomial Calibration Fit: Pressure vs Voltage
 //
-// NAME: ________________________________
-// ID:   ________________________________
+// NAME: John Rhiemar A.Pamen________________________________
+// ID:    2024-3046________________________________
 //
 // You must implement TWO functions in this file.
 // Do NOT change the function signatures.
@@ -39,17 +39,33 @@ funcprot(0);   // suppress redefinition warnings when re-running
 //   - Use Scilab's backslash operator (\) to solve the resulting system.
 // ------------------------------------------------------------
 function [coeff] = poly_fit(x, y, k)
-
-    // TODO: validate inputs — check length(x)==length(y) and 1<=k<=n-1
-
-    // TODO: force column vectors: x = x(:);  y = y(:);  n = length(x);
-
-    // TODO: build Z (n x k+1): column j holds x.^(j-1), for j = 1 to k+1
-    //       Hint: initialise Z = zeros(n, k+1), then fill it in a loop.
-
+     // TODO: force column vectors: x = x(:);  y = y(:);  n = length(x);
+    x = x(:);  
+    y = y(:);  
+    n = length(x);
+    
+    
+     // TODO: validate inputs — check length(x)==length(y) and 1<=k<=n-1
+    if length(y) <> n then
+        error("Error: x and y vectors must have the same length.");
+    end
+    if k < 1 | k >= n then
+        error("Error: Degree k must satisfy 1 <= k <= n-1.");
+    end
+     // TODO: build Z (n x k+1): column j holds x.^(j-1), for j = 1 to k+1
+      //       Hint: initialise Z = zeros(n, k+1), then fill it in a loop.
+    Z = zeros(n, k+1);
+    for j = 1:(k+1)
+        Z(:, j) = x.^(j-1);
+    end
     // TODO: form the two matrices that appear in the Normal Equations
-    //       (one is (k+1)x(k+1), one is (k+1)x1), then solve the system
-    //       using the backslash operator (\).
+    coeff = (Z' * Z) \ (Z' * y);
+
+    
+
+   
+
+  
 
 endfunction
 
@@ -76,6 +92,33 @@ endfunction
 //   - Loop over each element of x_query if it is a vector.
 // ------------------------------------------------------------
 function [y_query] = eval_poly(coeff, x_query)
+    // 1. Force strict column structures
+    coeff = coeff(:);
+    x_query = x_query(:);
+    
+    num_queries = length(x_query);
+    k = length(coeff) - 1; // Polynomial degree
+    
+    // 2. Allocate output space as a column vector
+    y_query = zeros(num_queries, 1);
+    
+    // 3. Loop over each element of x_query individually
+    for i = 1:num_queries
+        current_x = x_query(i);
+        
+        // Initialize Horner's tracker with the highest-degree coefficient (ck)
+        val = coeff(k+1);
+        
+        // Work downward: step from index k down to 1
+        for j = k:-1:1
+            val = coeff(j) + current_x * val;
+        end
+        
+        // Store the scalar result
+        y_query(i) = val;
+    end
+    
+ 
 
     // TODO: ensure coeff and x_query are column vectors; allocate y_query
     //       as a zeros column vector with the same number of elements as x_query.

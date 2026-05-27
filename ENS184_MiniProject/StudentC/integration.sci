@@ -36,20 +36,6 @@ funcprot(0);   // suppress redefinition warnings when re-running
 //     sums explicitly before coding them.
 //   - Consider what R² should equal when all observed values are identical
 //     (SS_tot = 0) and handle that case explicitly.
-// ============================================================
-// ============================================================================
-// Function 1: goodness_of_fit
-// Inputs:  y_actual (vector), y_pred (vector)
-// Outputs: rmse (scalar), r2 (scalar)
-// ============================================================================
-// ============================================================
-// integration.sci  —  Student C Solution
-// Goodness-of-Fit Metrics and Failure-Hour Prediction
-// ============================================================
-funcprot(0);   // suppress redefinition warnings when re-running
-
-// ------------------------------------------------------------
-// Function 1: goodness_of_fit
 // ------------------------------------------------------------
 function [rmse, r2]=goodness_of_fit(y_actual, y_pred)
 
@@ -89,6 +75,33 @@ endfunction
 
 // ------------------------------------------------------------
 // Function 2: find_threshold_hour
+//
+//
+// Uses bisection to find the hour h* at which the fitted
+// vibration curve first crosses the failure threshold.
+//
+// Input:
+//   hours     - sorted hour vector (from load_data)           (n)
+//   vib_fit   - fitted vibration vector (from predict_vibration) (n)
+//   threshold - failure vibration level (scalar, e.g. 9.5)
+//
+// Output:
+//   h_star - predicted failure hour (scalar)
+//            Returns Inf if vibration never reaches threshold.
+//
+// Hints:
+//   - First handle the edge case: what should the function return if
+//     vibration never reaches the threshold?
+//   - Scan vib_fit to find a consecutive pair of points that "straddle"
+//     the threshold (one below, the next at or above).  This gives your
+//     starting bracket [h_lo, h_hi].
+//   - Apply bisection: halve the bracket repeatedly, keeping whichever
+//     half still contains the crossing.  Stop when the bracket width
+//     is less than 0.5 h.
+//   - Inside the bracket you have only the two endpoint values of
+//     vib_fit.  How can you estimate vib_fit at any interior hour
+//     without calling predict_vibration again?
+//   - A for-loop with up to 100 iterations is plenty for convergence.
 // ------------------------------------------------------------
 function [h_star]=find_threshold_hour(hours, vib_fit, threshold)
 

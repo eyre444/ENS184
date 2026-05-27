@@ -36,12 +36,6 @@ funcprot(0);   // suppress redefinition warnings when re-running
 //     sums explicitly before coding them.
 //   - Consider what R² should equal when all observed values are identical
 //     (SS_tot = 0) and handle that case explicitly.
-// HOW TO USE THIS FILE:
-//   1. Develop and test your code in  StudentC/integration.sci
-//   2. When ready to run the test suite, COPY your finished
-//      implementation into THIS file (replace the stubs below).
-//   3. Run:  exec('test_suites/test_studentC.sci', -1)
-//      from the phm_project/ directory.
 // ============================================================
 // ============================================================================
 // Function 1: goodness_of_fit

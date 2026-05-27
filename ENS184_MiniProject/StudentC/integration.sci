@@ -1,9 +1,10 @@
 // ============================================================
-// integration.sci  —  Student C Module  [INTEGRATION COPY]
+// integration.sci  —  Student C Skeleton
 // Goodness-of-Fit Metrics and Failure-Hour Prediction
 //
-//NAME: Carlo Jane A. Branggan
-//ID: 2024-0413
+// NAME: _Carlo Jane A. Branggan_______________________________
+// ID:   __2024-0413______________________________
+//
 // You must implement TWO functions in this file.
 // Do NOT change the function signatures.
 //
@@ -37,9 +38,9 @@ funcprot(0);   // suppress redefinition warnings when re-running
 //   - Consider what R² should equal when all observed values are identical
 //     (SS_tot = 0) and handle that case explicitly.
 // ------------------------------------------------------------
-function [rmse, r2]=goodness_of_fit(y_actual, y_pred)
+function [rmse, r2] = goodness_of_fit(y_actual, y_pred)
 
-    // TODO: validate that y_actual and y_pred have the same length
+   // TODO: validate that y_actual and y_pred have the same length
     if length(y_actual) <> length(y_pred) then
         error("Input vectors y_actual and y_pred must have the same length.");
     end
@@ -47,35 +48,40 @@ function [rmse, r2]=goodness_of_fit(y_actual, y_pred)
     // TODO: ensure column vectors
     y_actual = y_actual(:);
     y_pred = y_pred(:);
+    
+    n = length(y_actual);
 
     // TODO: compute residuals
     residuals = y_actual - y_pred;
 
     // TODO: compute RMSE
-    n = length(y_actual);
-    rmse = sqrt(sum(residuals.^2) / n);
+    // RMSE = sqrt( (1/n) * sum( (y_actual - y_pred)^2 ) )
+    rmse = sqrt(mean(residuals.^2));
 
     // TODO: compute SS_res and SS_tot
+    // SS_res is the sum of squared residuals
+    SS_res = sum(residuals.^2);
+    
+    // SS_tot is the total sum of squares (variance around the mean)
     mean_actual = mean(y_actual);
-    ss_res = sum(residuals.^2);
-    ss_tot = sum((y_actual - mean_actual).^2);
+    SS_tot = sum((y_actual - mean_actual).^2);
 
     // TODO: compute r2 = 1 - SS_res / SS_tot  (handle SS_tot == 0)
-    if ss_tot == 0 then
-        if ss_res == 0 then
-            r2 = 1.0;  // Perfect match for a completely constant dataset
+    if SS_tot == 0 then
+        // If all actual values are identical, SS_tot is 0. 
+        // If the model predicts perfectly (SS_res == 0), R2 is 1. Otherwise, it's 0.
+        if SS_res == 0 then
+            r2 = 1.0;
         else
-            r2 = 0.0;  // Constant dataset but model predictions vary/miss
+            r2 = 0.0;
         end
     else
-        r2 = 1.0 - (ss_res / ss_tot);
+        r2 = 1.0 - (SS_res / SS_tot);
     end
 
 endfunction
-
 // ------------------------------------------------------------
 // Function 2: find_threshold_hour
-//
 //
 // Uses bisection to find the hour h* at which the fitted
 // vibration curve first crosses the failure threshold.
@@ -103,7 +109,7 @@ endfunction
 //     without calling predict_vibration again?
 //   - A for-loop with up to 100 iterations is plenty for convergence.
 // ------------------------------------------------------------
-function [h_star]=find_threshold_hour(hours, vib_fit, threshold)
+function [h_star] = find_threshold_hour(hours, vib_fit, threshold)
 
     // TODO: force column vectors;  n = length(hours);
     hours = hours(:);
@@ -111,51 +117,73 @@ function [h_star]=find_threshold_hour(hours, vib_fit, threshold)
     n = length(hours);
 
     // ---- Step 1: find the bracket ----
+    // Scan consecutive pairs (vib_fit(i), vib_fit(i+1)).
+    // A bracket exists when one value is below threshold and the next is
+    // at or above it, i.e. (vib_fit(i)-threshold)*(vib_fit(i+1)-threshold) <= 0.
+    // TODO: initialise i_lo = 0, then loop i = 1:n-1:
+    //       if (vib_fit(i)-threshold)*(vib_fit(i+1)-threshold) <= 0
+    //           i_lo = i; break;
+    //       end
     i_lo = 0;
-    for i = 1:(n-1)
-        if (vib_fit(i) - threshold) * (vib_fit(i+1) - threshold) <= 0 then
+    for i = 1:(n - 1)
+        if (vib_fit(i) - threshold) * (vib_fit(i + 1) - threshold) <= 0 then
             i_lo = i;
             break;
         end
     end
 
     // ---- Step 2: handle no-crossing case ----
+    // TODO: if i_lo == 0, no crossing was found.
+    //       if vib_fit(n) < threshold: h_star = %inf; return;
+    //       else: h_star = hours(1); return; // already exceeded at start
     if i_lo == 0 then
         if vib_fit(n) < threshold then
             h_star = %inf;
             return;
         else
-            h_star = hours(1); // Already exceeded at start
-            return;
+            h_star = hours(1);
+            return; // already exceeded at start
         end
     end
 
     // ---- Step 3: set up bracket endpoints ----
+    // Define g(h) = (vib_fit value at h) - threshold.
+    // TODO: extract the hour values and g-values at index i_lo and i_lo+1.
     h_lo = hours(i_lo);
-    h_hi = hours(i_lo+1);
+    h_hi = hours(i_lo + 1);
     
     g_lo = vib_fit(i_lo) - threshold;
-    g_hi = vib_fit(i+1) - threshold;
+    g_hi = vib_fit(i_lo + 1) - threshold;
 
     // ---- Step 4: bisection loop ----
+    // TODO: repeat up to 100 times:
+    //   Compute the midpoint hour h_mid = (h_lo + h_hi) / 2.
+    //   You have only g at the two bracket endpoints — estimate g at h_mid
+    //   by linear interpolation between those two known g-values.
+    //   Based on the sign of g at h_mid, shrink the bracket to the half
+    //   that still contains the sign change.
+    //   Stop when the bracket width is less than 0.5 h.
     for iter = 1:100
-        // Stop when the bracket width is less than 0.5 h
+        // Stop if the physical window width drops below 0.5 hours
         if (h_hi - h_lo) < 0.5 then
             break;
         end
         
-        // Compute the midpoint hour
         h_mid = (h_lo + h_hi) / 2;
         
-        // Estimate g at h_mid by linear interpolation between the two known g-values
-        // Equation: g_mid = g_lo + (h_mid - h_lo) * (g_hi - g_lo) / (h_hi - h_lo)
-        g_mid = g_lo + (h_mid - h_lo) * (g_hi - g_lo) / (h_hi - h_lo);
+        // Linear interpolation weight (fractional distance of h_mid between h_lo and h_hi)
+        // Since h_mid is the exact midpoint, weight is 0.5, but we write it out 
+        // to clearly match the explicit linear interpolation requirement:
+        weight = (h_mid - h_lo) / (h_hi - h_lo);
+        g_mid = g_lo + weight * (g_hi - g_lo);
         
-        // Shrink the bracket based on the sign change
+        // Shrink the interval to the half that preserves the zero-crossing (opposite signs)
         if (g_lo * g_mid) <= 0 then
+            // Root is in the lower half
             h_hi = h_mid;
             g_hi = g_mid;
         else
+            // Root is in the upper half
             h_lo = h_mid;
             g_lo = g_mid;
         end
